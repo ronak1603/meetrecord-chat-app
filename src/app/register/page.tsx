@@ -1,5 +1,5 @@
 "use client";
-import { useEffect, useState } from "react";
+import { MouseEvent, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
 import { createUserWithEmailAndPassword } from "firebase/auth";
@@ -9,13 +9,16 @@ import { TextField, Button, Container } from "@mui/material";
 import Link from "next/link";
 import { AvatarGenerator } from "random-avatar-generator";
 import Image from "next/image";
+import { useForm } from "@mantine/form";
+import { validateEmail } from "@/utils/validations";
 
 interface RegisterData {
+  name: string;
   email: string;
   password: string;
 }
 
-const signup = async (email: string, password: string) => {
+const signup = async (email: string, password: string, name: string) => {
   const userCredential = await createUserWithEmailAndPassword(
     auth,
     email,
@@ -23,17 +26,16 @@ const signup = async (email: string, password: string) => {
   );
   const user = userCredential.user;
   const linkId = user.uid + Date.now().toString();
-  await setDoc(doc(firestore, "users", user.uid), { linkId, email, password });
+  await setDoc(doc(firestore, "users", user.uid), {
+    linkId,
+    name,
+    email,
+    password,
+  });
   return linkId;
 };
 
 const SignupPage = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [name, setName] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [errors, setErrors] = useState({ name, email, password });
-  const [loading, setLoading] = useState(false);
   const [avatarUrl, setAvatarUrl] = useState("");
   const router = useRouter();
 
@@ -50,64 +52,49 @@ const SignupPage = () => {
     setAvatarUrl(generateRandomAvatar());
   }, []);
 
-  const validateForm = () => {
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    const newErrors = { name, email, password };
-    if (!name.trim()) {
-      newErrors.name = "Name is required";
-    }
-    if (!email.trim() || !emailRegex.test(email)) {
-      newErrors.email = "Invalid email address";
-    }
-    if (password.length < 6) {
-      newErrors.password = "Password must be at least 6 characters";
-    }
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0; // Return true if no errors
-  };
+  const registerForm = useForm<RegisterData>({
+    validateInputOnBlur: true,
+    initialValues: {
+      name: "",
+      email: "",
+      password: "",
+    },
+    validate: {
+      name: (value) => (value.length == 0 ? "Name is required" : null),
+      email: (value) => {
+        return validateEmail(value);
+      },
+      password: (value) => (value.length < 6 ? "Password is too short" : null),
+    },
+  });
 
   const { mutate, isPending } = useMutation({
     mutationFn: (data: RegisterData) => {
-      return signup(data.email, data.password);
+      return signup(data.email, data.password, data.name);
     },
-    onSuccess: (linkId) => {
-      router.push(`/chats/${linkId}`);
+    onSuccess: () => {
+      router.push(`/dashboard`);
     },
     onError: (error) => {
       console.error(error);
     },
   });
 
-  console.log(avatarUrl, "avatarUrl");
+  const handleSubmit = (event?: React.FormEvent<HTMLFormElement>) => {
+    event?.preventDefault();
+    mutate(registerForm.values);
+  };
 
   return (
-    // <Container>
-    //   <h1>Signup</h1>
-    //   <TextField
-    //     label="Email"
-    //     value={email}
-    //     onChange={(e) => setEmail(e.target.value)}
-    //   />
-    //   <TextField
-    //     label="Password"
-    //     type="password"
-    //     value={password}
-    //     onChange={(e) => setPassword(e.target.value)}
-    //   />
-    //   <Button onClick={() => mutate({ email, password })}>Signup</Button>
-    // </Container>
-
-    <Container className="flex justify-center items-center h-screen font-primary p-10 m-2">
-      {/*form*/}
+    <Container maxWidth="sm">
       <form
-        onSubmit={() => mutate({ email, password })}
+        onSubmit={handleSubmit}
         className="space-y-4 w-full max-w-2xl shadow-lg p-10"
       >
         <h1 className="font-secondary text-xl text-center font-semibold text-[#0b3a65ff]">
-          CHAT<span className="font-bold text-[#eeab63ff]">2</span>CHAT
+          Chat<span className="font-bold text-[#eeab63ff]">Hub</span>
         </h1>
 
-        {/* Display the avatar and refresh button */}
         <div className="flex items-center space-y-2 justify-between border border-gray-200 p-2">
           <Image
             src={avatarUrl}
@@ -116,72 +103,63 @@ const SignupPage = () => {
             width={50}
             height={50}
           />
-          <button
+          <Button
             type="button"
-            className="btn btn-outline"
+            className="bg-[#0b3a65ff] text-white"
             onClick={handleRefreshAvatar}
           >
             New Avatar
-          </button>
+          </Button>
         </div>
 
-        {/*name*/}
-        <div>
-          <label className="label">
-            <span className="text-base label-text">Name</span>
-          </label>
-          <input
-            type="text"
-            placeholder="Name"
-            className="w-full input input-bordered"
-            value={name}
-            onChange={(e) => setName(e.target.value)}
-          />
-          {errors.name && <span className="text-red-500">{errors.name}</span>}
-        </div>
-
-        {/*email*/}
-        <div>
-          <label className="label">
-            <span className="text-base label-text">Email</span>
-          </label>
-          <input
-            type="text"
-            placeholder="Email"
-            className="w-full input input-bordered"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-          />
-          {errors.email && <span className="text-red-500">{errors.email}</span>}
-        </div>
-
-        {/*password*/}
         <div>
           <TextField
-            type="password"
-            placeholder="Enter Password"
-            className="w-full"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
+            {...registerForm.getInputProps("name")}
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            label="Name"
           />
-          {errors.password && (
-            <span className="text-red-500">{errors.password}</span>
+          {registerForm.errors.name && (
+            <span className="text-red-500">{registerForm.errors.name}</span>
           )}
         </div>
 
-        {/*confirm password*/}
+        <div>
+          <TextField
+            {...registerForm.getInputProps("email")}
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            label="Email"
+          />
+          {registerForm.errors.email && (
+            <span className="text-red-500">{registerForm.errors.email}</span>
+          )}
+        </div>
 
         <div>
-          <button
+          <TextField
+            {...registerForm.getInputProps("password")}
+            fullWidth
+            margin="normal"
+            variant="outlined"
+            label="Password"
+            type="password"
+          />
+          {registerForm.errors.password && (
+            <span className="text-red-500">{registerForm.errors.password}</span>
+          )}
+        </div>
+
+        <div>
+          <Button
             type="submit"
-            className="btn btn-block bg-[#0b3a65ff] text-white"
+            onClick={() => handleSubmit()}
+            className="bg-[#0b3a65ff] text-white"
           >
-            {loading ? (
-              <span className="loading loading-spinner loading-sm"></span>
-            ) : (
-              "Sign Up"
-            )}
-          </button>
+            {isPending ? "Signing Up..." : "Sign Up"}
+          </Button>
         </div>
 
         <span>
