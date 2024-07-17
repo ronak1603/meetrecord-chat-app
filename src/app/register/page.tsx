@@ -1,43 +1,35 @@
 "use client";
-import { MouseEvent, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useMutation } from "@tanstack/react-query";
-import { createUserWithEmailAndPassword } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
-import { auth, firestore } from "@/services/firebase";
-import { TextField, Button, Container } from "@mui/material";
+import {
+  TextField,
+  Button,
+  Container,
+  Box,
+  Typography,
+  CircularProgress,
+} from "@mui/material";
 import Link from "next/link";
 import { AvatarGenerator } from "random-avatar-generator";
 import Image from "next/image";
 import { useForm } from "@mantine/form";
 import { validateEmail } from "@/utils/validations";
+import { useAuth } from "@/context/AuthContext";
+import authImage from "@/assets/images/authImage.svg";
 
 interface RegisterData {
   name: string;
   email: string;
   password: string;
+  avatarUrl: string;
 }
-
-const signup = async (email: string, password: string, name: string) => {
-  const userCredential = await createUserWithEmailAndPassword(
-    auth,
-    email,
-    password
-  );
-  const user = userCredential.user;
-  const linkId = user.uid + Date.now().toString();
-  await setDoc(doc(firestore, "users", user.uid), {
-    linkId,
-    name,
-    email,
-    password,
-  });
-  return linkId;
-};
 
 const SignupPage = () => {
   const [avatarUrl, setAvatarUrl] = useState("");
+
   const router = useRouter();
+  const { register } = useAuth();
 
   const generateRandomAvatar = () => {
     const generator = new AvatarGenerator();
@@ -45,11 +37,14 @@ const SignupPage = () => {
   };
 
   const handleRefreshAvatar = () => {
-    setAvatarUrl(generateRandomAvatar());
+    const newAvatarUrl = generateRandomAvatar();
+    setAvatarUrl(newAvatarUrl);
+    registerForm.setFieldValue("avatarUrl", newAvatarUrl);
   };
 
   useEffect(() => {
-    setAvatarUrl(generateRandomAvatar());
+    handleRefreshAvatar();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const registerForm = useForm<RegisterData>({
@@ -58,19 +53,18 @@ const SignupPage = () => {
       name: "",
       email: "",
       password: "",
+      avatarUrl,
     },
     validate: {
       name: (value) => (value.length == 0 ? "Name is required" : null),
-      email: (value) => {
-        return validateEmail(value);
-      },
+      email: (value) => validateEmail(value),
       password: (value) => (value.length < 6 ? "Password is too short" : null),
     },
   });
 
-  const { mutate, isPending } = useMutation({
+  const { mutate, isLoading } = useMutation({
     mutationFn: (data: RegisterData) => {
-      return signup(data.email, data.password, data.name);
+      return register(data.email, data.password, data.name, data.avatarUrl);
     },
     onSuccess: () => {
       router.push(`/dashboard`);
@@ -86,92 +80,174 @@ const SignupPage = () => {
   };
 
   return (
-    <Container maxWidth="sm">
-      <form
-        onSubmit={handleSubmit}
-        className="space-y-4 w-full max-w-2xl shadow-lg p-10"
+    <Container
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        height: "100vh",
+        width: "100vw",
+      }}
+      style={{ padding: "0px" }}
+      maxWidth="xl"
+    >
+      <Box
+        className="flex w-full justify-center items-center bg-blue-400"
+        sx={{
+          display: "flex",
+          flexDirection: "column",
+          gap: "16px",
+          justifyContent: "center",
+          alignItems: "center",
+          background: "#60a5fa",
+          padding: "0px",
+        }}
       >
-        <h1 className="font-secondary text-xl text-center font-semibold text-[#0b3a65ff]">
-          Chat<span className="font-bold text-[#eeab63ff]">Hub</span>
-        </h1>
-
-        <div className="flex items-center space-y-2 justify-between border border-gray-200 p-2">
-          <Image
-            src={avatarUrl}
-            alt="Avatar"
-            className="rounded-full"
-            width={50}
-            height={50}
-          />
-          <Button
-            type="button"
-            className="bg-[#0b3a65ff] text-white"
-            onClick={handleRefreshAvatar}
+        <Typography
+          variant="h4"
+          color="white"
+          sx={{ fontSize: "32px", fontWeight: 600, textAlign: "center" }}
+        >
+          Connect Instantly, Chat Seamlessly,
+        </Typography>
+        <Typography
+          variant="h4"
+          color="white"
+          sx={{ fontSize: "32px", fontWeight: 600, textAlign: "center" }}
+        >
+          Anytime, Anywhere.
+        </Typography>
+        <Image src={authImage} alt="authImage" />
+      </Box>
+      <Box className="flex w-full justify-center items-center">
+        <form onSubmit={handleSubmit} className="space-y-4 shadow-lg p-10">
+          <Typography
+            variant="h4"
+            color="white"
+            sx={{
+              fontSize: "32px",
+              fontWeight: 600,
+              textAlign: "center",
+              color: "#60a5fa",
+            }}
           >
-            New Avatar
-          </Button>
-        </div>
+            Chat<span className="font-bold text-[#eeab63ff]">Hub</span>
+          </Typography>
 
-        <div>
-          <TextField
-            {...registerForm.getInputProps("name")}
-            fullWidth
-            margin="normal"
-            variant="outlined"
-            label="Name"
-          />
-          {registerForm.errors.name && (
-            <span className="text-red-500">{registerForm.errors.name}</span>
-          )}
-        </div>
+          <div className="flex items-center space-y-2 justify-between border rounded border-gray-200 p-2">
+            <Image
+              src={avatarUrl}
+              alt="Avatar"
+              className="rounded-full"
+              width={50}
+              height={50}
+            />
+            <Button
+              type="button"
+              sx={{
+                background: "#eeab63ff",
+                color: "white",
+                textTransform: "none",
+                "&:hover": {
+                  background: "#eeab63ff",
+                },
+              }}
+              onClick={handleRefreshAvatar}
+            >
+              Shuffle Avatar
+            </Button>
+          </div>
 
-        <div>
-          <TextField
-            {...registerForm.getInputProps("email")}
-            fullWidth
-            margin="normal"
-            variant="outlined"
-            label="Email"
-          />
-          {registerForm.errors.email && (
-            <span className="text-red-500">{registerForm.errors.email}</span>
-          )}
-        </div>
-
-        <div>
-          <TextField
-            {...registerForm.getInputProps("password")}
-            fullWidth
-            margin="normal"
-            variant="outlined"
-            label="Password"
-            type="password"
-          />
-          {registerForm.errors.password && (
-            <span className="text-red-500">{registerForm.errors.password}</span>
-          )}
-        </div>
-
-        <div>
-          <Button
-            type="submit"
-            onClick={() => handleSubmit()}
-            className="bg-[#0b3a65ff] text-white"
+          <Box
+            sx={{ display: "flex", flexDirection: "column", height: "80px" }}
           >
-            {isPending ? "Signing Up..." : "Sign Up"}
-          </Button>
-        </div>
+            <TextField
+              {...registerForm.getInputProps("name")}
+              fullWidth
+              margin="normal"
+              variant="outlined"
+              label="Name"
+              className="w-96 h-12"
+            />
+            <Box>
+              {registerForm.errors.name && (
+                <Typography className="text-red-500">
+                  {registerForm.errors.name}
+                </Typography>
+              )}
+            </Box>
+          </Box>
 
-        <span>
-          Already have an account?{" "}
-          <Link
-            href="/login"
-            className="text-blue-600 hover:text-blue-800 hover:underline"
+          <Box
+            sx={{ display: "flex", flexDirection: "column", height: "80px" }}
           >
-            Login
-          </Link>
-        </span>
-      </form>
+            <TextField
+              {...registerForm.getInputProps("email")}
+              fullWidth
+              margin="normal"
+              variant="outlined"
+              label="Email"
+              className="w-96 h-12"
+            />
+            <Box>
+              {registerForm.errors.email && (
+                <Typography className="text-red-500">
+                  {registerForm.errors.email}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+
+          <Box
+            sx={{ display: "flex", flexDirection: "column", height: "80px" }}
+          >
+            <TextField
+              {...registerForm.getInputProps("password")}
+              fullWidth
+              margin="normal"
+              variant="outlined"
+              label="Password"
+              type="password"
+              className="w-96 h-12"
+            />
+            <Box>
+              {registerForm.errors.password && (
+                <Typography className="text-red-500">
+                  {registerForm.errors.password}
+                </Typography>
+              )}
+            </Box>
+          </Box>
+
+          <Box style={{ marginTop: "24px" }}>
+            <Button
+              type="submit"
+              sx={{
+                background: isLoading ? "#9ca3af" : "#60a5fa",
+                color: "white",
+                width: "384px",
+                textTransform: "none",
+                height: "48px",
+                cursor: isLoading ? "not-allowed" : "pointer",
+                "&:hover": {
+                  background: "#60a5fa",
+                },
+              }}
+              onClick={() => handleSubmit()}
+              endIcon={isLoading ? <CircularProgress size={20} /> : null}
+              disabled={isLoading}
+            >
+              {isLoading ? "Signing Up..." : "Sign Up"}
+            </Button>
+          </Box>
+
+          <Box sx={{ display: "flex", justifyContent: "center" }}>
+            Already have an account?&nbsp;
+            <Link href="/login" className="text-[#60a5fa] underline">
+              Login
+            </Link>
+          </Box>
+        </form>
+      </Box>
     </Container>
   );
 };
