@@ -1,7 +1,10 @@
 import { ReactNode } from "react";
-import ThemeProviderClient from "../components/ThemeProviderClient";
 import QueryProviderClient from "../components/QueryProviderClient";
 import "./globals.css";
+import { AuthProvider } from "@/context/AuthContext";
+import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
+import { ThemeProvider } from "@mui/system";
+import theme from "@/services/theme";
 
 export const metadata = {
   title: "Chat App",
@@ -13,9 +16,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <head />
       <body>
-        <QueryProviderClient>
-          <ThemeProviderClient>{children}</ThemeProviderClient>
-        </QueryProviderClient>
+        <AuthProvider>
+          <QueryProviderClient>
+            <AppRouterCacheProvider>
+              <ThemeProvider theme={theme}>{children}</ThemeProvider>
+            </AppRouterCacheProvider>
+          </QueryProviderClient>
+        </AuthProvider>
       </body>
     </html>
   );
