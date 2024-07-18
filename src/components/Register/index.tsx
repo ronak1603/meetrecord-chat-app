@@ -17,6 +17,7 @@ import {
 
 import { validateEmail } from "@/utils/validations";
 import { useAuth } from "@/context/AuthContext";
+import chatlogo from "@/assets/images/chatlogo.svg";
 
 interface RegisterData {
   name: string;
@@ -82,17 +83,20 @@ const Signup = () => {
   return (
     <Box className="flex w-full justify-center items-center">
       <form onSubmit={handleSubmit} className="space-y-4 shadow-lg p-10">
+        <Box sx={{ display: "flex", justifyContent: "center" }}>
+          <Image src={chatlogo} alt="logo" width={50} height={50} />
+        </Box>
         <Typography
           variant="h4"
-          color="white"
           sx={{
-            fontSize: "32px",
+            fontSize: "36px",
             fontWeight: 600,
+            // fontFamily: "initial",
             textAlign: "center",
-            color: "#60a5fa",
+            color: "#1E3ABA",
           }}
         >
-          Chat<span className="font-bold text-[#eeab63ff]">Hub</span>
+          CHATHUB
         </Typography>
 
         <div className="flex items-center space-y-2 justify-between border rounded border-gray-200 p-2">
@@ -119,14 +123,19 @@ const Signup = () => {
           </Button>
         </div>
 
-        <Box sx={{ display: "flex", flexDirection: "column", height: "80px" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", height: "75px" }}>
           <TextField
             {...registerForm.getInputProps("name")}
             fullWidth
             margin="normal"
             variant="outlined"
             label="Name"
-            className="w-96 h-12"
+            sx={{
+              width: "384px",
+              "& .MuiInputBase-root": {
+                height: "48px",
+              },
+            }}
           />
           <Box>
             {registerForm.errors.name && (
@@ -137,14 +146,19 @@ const Signup = () => {
           </Box>
         </Box>
 
-        <Box sx={{ display: "flex", flexDirection: "column", height: "80px" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", height: "75px" }}>
           <TextField
             {...registerForm.getInputProps("email")}
             fullWidth
             margin="normal"
             variant="outlined"
             label="Email"
-            className="w-96 h-12"
+            sx={{
+              width: "384px",
+              "& .MuiInputBase-root": {
+                height: "48px",
+              },
+            }}
           />
           <Box>
             {registerForm.errors.email && (
@@ -155,7 +169,7 @@ const Signup = () => {
           </Box>
         </Box>
 
-        <Box sx={{ display: "flex", flexDirection: "column", height: "80px" }}>
+        <Box sx={{ display: "flex", flexDirection: "column", height: "75px" }}>
           <TextField
             {...registerForm.getInputProps("password")}
             fullWidth
@@ -163,7 +177,12 @@ const Signup = () => {
             variant="outlined"
             label="Password"
             type="password"
-            className="w-96 h-12"
+            sx={{
+              width: "384px",
+              "& .MuiInputBase-root": {
+                height: "48px",
+              },
+            }}
           />
           <Box>
             {registerForm.errors.password && (
@@ -178,14 +197,14 @@ const Signup = () => {
           <Button
             type="submit"
             sx={{
-              background: isLoading ? "#9ca3af" : "#60a5fa",
+              background: isLoading ? "#9ca3af" : "#1E3ABA",
               color: "white",
               width: "384px",
               textTransform: "none",
               height: "48px",
               cursor: isLoading ? "not-allowed" : "pointer",
               "&:hover": {
-                background: "#60a5fa",
+                background: "#1E3ABA",
               },
             }}
             onClick={() => handleSubmit()}
@@ -198,7 +217,7 @@ const Signup = () => {
 
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           Already have an account?&nbsp;
-          <Link href="/login" className="text-[#60a5fa] underline">
+          <Link href="/login" className="text-[#1E3ABA] underline">
             Login
           </Link>
         </Box>
