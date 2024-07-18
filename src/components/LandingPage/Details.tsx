@@ -28,6 +28,17 @@ const DetailsComponent = () => {
       >
         <Box sx={{ display: "flex", flexDirection: "column", gap: "16px" }}>
           <Typography
+            variant="h2"
+            sx={{
+              fontSize: "72px",
+              fontWeight: 700,
+              // fontFamily: "initial",
+              color: "#1E3ABA",
+            }}
+          >
+            CHATHUB
+          </Typography>
+          <Typography
             variant="h4"
             color="white"
             sx={{
@@ -49,7 +60,7 @@ const DetailsComponent = () => {
               color: "#000",
             }}
           >
-            Frineds, Anytime
+            Friends, Anytime
           </Typography>
           <Typography
             variant="h4"
@@ -98,21 +109,51 @@ const DetailsComponent = () => {
           >
             place at any time without any interruption.
           </Typography>
+        </Box>
+        <Box sx={{ display: "flex", gap: "24px", alignItems: "center" }}>
           <Button
-            type="button"
+            variant="contained"
+            color="primary"
             sx={{
-              background: "#eeab63ff",
-              color: "white",
-              marginTop: "24px",
-              padding: "8px 16px 8px 16px",
               textTransform: "none",
+              height: "48px",
+              padding: "12px 24px 12px 24px",
+              fontSize: "16px",
+              fontWeight: "600",
+              border: "1px solid #1E3ABA",
+              color: "#1A1A1A",
+              boxShadow: "0",
+              background: "#fff",
               "&:hover": {
-                background: "#eeab63ff",
+                background: "#fff",
               },
+              marginTop: "16px",
             }}
             onClick={() => router.push("/login")}
           >
-            Start Chatting Now →
+            Login
+          </Button>
+          <Button
+            variant="contained"
+            color="secondary"
+            sx={{
+              textTransform: "none",
+              height: "48px",
+              padding: "12px",
+              fontSize: "16px",
+              fontWeight: "600",
+              color: "#1A1A1A",
+              background: "none",
+              boxShadow: "0",
+              "&:hover": {
+                background: "none",
+                boxShadow: "0",
+              },
+              marginTop: "16px",
+            }}
+            onClick={() => router.push("/register")}
+          >
+            Join Chathub →
           </Button>
         </Box>
       </Box>

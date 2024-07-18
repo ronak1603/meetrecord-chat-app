@@ -22,7 +22,7 @@ const FooterSection = () => {
           display: "flex",
           justifyContent: "space-between",
           alignItems: "center",
-          padding: "12px",
+          padding: "12px 48px 12px 48px",
           marginTop: "8px",
         }}
       >
