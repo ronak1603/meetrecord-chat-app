@@ -8,6 +8,7 @@
 }
 
 #nprogress .spinner-icon {
+  display: none;
   border-top-color: #1e3a8a;
 }
 
