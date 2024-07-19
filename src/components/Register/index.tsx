@@ -93,7 +93,7 @@ const Signup = () => {
             fontWeight: 600,
             // fontFamily: "initial",
             textAlign: "center",
-            color: "#1E3ABA",
+            color: "#1E3A8A",
           }}
         >
           CHATHUB
@@ -197,18 +197,22 @@ const Signup = () => {
           <Button
             type="submit"
             sx={{
-              background: isLoading ? "#9ca3af" : "#1E3ABA",
+              background: isLoading ? "#9ca3af" : "#1E3A8A",
               color: "white",
               width: "384px",
               textTransform: "none",
               height: "48px",
               cursor: isLoading ? "not-allowed" : "pointer",
               "&:hover": {
-                background: "#1E3ABA",
+                background: "#1E3A8A",
               },
             }}
             onClick={() => handleSubmit()}
-            endIcon={isLoading ? <CircularProgress size={20} /> : null}
+            endIcon={
+              isLoading ? (
+                <CircularProgress size={20} sx={{ color: "#fff" }} />
+              ) : null
+            }
             disabled={isLoading}
           >
             {isLoading ? "Signing Up..." : "Sign Up"}
@@ -217,7 +221,7 @@ const Signup = () => {
 
         <Box sx={{ display: "flex", justifyContent: "center" }}>
           Already have an account?&nbsp;
-          <Link href="/login" className="text-[#1E3ABA] underline">
+          <Link href="/login" className="text-[#1E3A8A] underline">
             Login
           </Link>
         </Box>

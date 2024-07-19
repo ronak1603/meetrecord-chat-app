@@ -33,7 +33,7 @@ const DetailsComponent = () => {
               fontSize: "72px",
               fontWeight: 700,
               // fontFamily: "initial",
-              color: "#1E3ABA",
+              color: "#1E3A8A",
             }}
           >
             CHATHUB
@@ -120,7 +120,7 @@ const DetailsComponent = () => {
               padding: "12px 24px 12px 24px",
               fontSize: "16px",
               fontWeight: "600",
-              border: "1px solid #1E3ABA",
+              border: "1px solid #1E3A8A",
               color: "#1A1A1A",
               boxShadow: "0",
               background: "#fff",

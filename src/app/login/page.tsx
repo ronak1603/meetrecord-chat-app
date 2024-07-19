@@ -24,7 +24,7 @@ const LoginPage = () => {
           gap: "16px",
           justifyContent: "center",
           alignItems: "center",
-          background: "#1E3ABA",
+          background: "#1E3A8A",
           padding: "0px",
         }}
       >
