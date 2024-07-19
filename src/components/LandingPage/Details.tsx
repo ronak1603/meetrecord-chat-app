@@ -1,25 +1,30 @@
 "use client";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
+import { useEffect, useState } from "react";
 
 import { Box, Button, Typography } from "@mui/material";
 import header from "@/assets/images/header.svg";
 
 const DetailsComponent = () => {
   const router = useRouter();
-  const getTokenFromCookie = () => {
-    const tokenName = "token=";
-    const cookies = document.cookie.split(";");
-    for (let i = 0; i < cookies.length; i++) {
-      let cookie = cookies[i].trim();
-      if (cookie.startsWith(tokenName)) {
-        return cookie.substring(tokenName.length);
-      }
-    }
-    return null;
-  };
+  const [token, setToken] = useState<string | null>(null);
 
-  const token = getTokenFromCookie();
+  useEffect(() => {
+    const getTokenFromCookie = () => {
+      const tokenName = "token=";
+      const cookies = document.cookie.split(";");
+      for (let i = 0; i < cookies.length; i++) {
+        let cookie = cookies[i].trim();
+        if (cookie.startsWith(tokenName)) {
+          return cookie.substring(tokenName.length);
+        }
+      }
+      return null;
+    };
+    setToken(getTokenFromCookie());
+  }, []);
+
   return (
     <Box
       sx={{
