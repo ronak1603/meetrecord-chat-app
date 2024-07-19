@@ -1,4 +1,4 @@
-import { ReactNode } from "react";
+import { ReactNode, Suspense } from "react";
 import QueryProviderClient from "../components/QueryProviderClient";
 import "./globals.css";
 import { AuthProvider } from "@/context/AuthContext";
@@ -22,7 +22,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <AppRouterCacheProvider>
               <ThemeProvider theme={theme}>
                 {children}
-                <RouteChangeHandler />
+                <Suspense fallback={<>Loading...</>}>
+                  <RouteChangeHandler />
+                </Suspense>
               </ThemeProvider>
             </AppRouterCacheProvider>
           </AuthProvider>
