@@ -1,8 +1,10 @@
 "use client";
-import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { useMutation } from "@tanstack/react-query";
 import Image from "next/image";
+import { doc, getDoc } from "firebase/firestore";
+
 import {
   Box,
   Button,
@@ -12,10 +14,9 @@ import {
   TextField,
   Typography,
 } from "@mui/material";
+import { useAuth } from "@/context/AuthContext";
 import chatlogo from "@/assets/images/chatlogo.svg";
-import { useMutation } from "@tanstack/react-query";
 import useChatMessages from "@/services/useChatMessages";
-import { doc, getDoc } from "firebase/firestore";
 import { firestore } from "@/services/firebase";
 
 const Dashboard = () => {
@@ -41,7 +42,6 @@ const Dashboard = () => {
       const roomDoc = await getDoc(doc(firestore, "chatRooms", roomId));
       return roomDoc.exists();
     } catch (error) {
-      console.error("Error checking room ID:", error);
       return false;
     }
   };
@@ -52,7 +52,7 @@ const Dashboard = () => {
     if (exists) {
       router.push(`/chats/${roomIdInput}`);
     } else {
-      router.push("/error");
+      router.push("/not-exist");
     }
   };
 
