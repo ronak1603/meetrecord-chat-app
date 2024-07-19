@@ -39,28 +39,6 @@ const fetchMessages = async (linkId: string): Promise<Message[]> => {
   }));
 };
 
-const deleteChatRoom = async (linkId: string) => {
-  try {
-    const batch = writeBatch(firestore);
-    const messagesCollection = collection(
-      firestore,
-      "chatRooms",
-      linkId,
-      "messages"
-    );
-    const messagesQuerySnapshot = await getDocs(messagesCollection);
-    messagesQuerySnapshot.forEach((messageDoc) => {
-      batch.delete(messageDoc.ref);
-    });
-    const chatRoomDoc = doc(firestore, "chatRooms", linkId);
-    batch.delete(chatRoomDoc);
-    await batch.commit();
-  } catch (error) {
-    console.error("Error deleting chat room:", error);
-    throw new Error("Failed to delete chat room");
-  }
-};
-
 const endChatRoomSession = async (linkId: string) => {
   const auth = getAuth();
   const currentUser = auth.currentUser;
@@ -162,7 +140,7 @@ const useChatMessages = (linkId: string | null) => {
   });
 
   const { mutate: deleteRoom } = useMutation<void, Error, string>({
-    mutationFn: deleteChatRoom,
+    mutationFn: endChatRoomSession,
     onSuccess: () => {
       router.push("/login");
       queryClient.invalidateQueries(["messages", linkId]);
