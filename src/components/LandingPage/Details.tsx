@@ -7,6 +7,19 @@ import header from "@/assets/images/header.svg";
 
 const DetailsComponent = () => {
   const router = useRouter();
+  const getTokenFromCookie = () => {
+    const tokenName = "token=";
+    const cookies = document.cookie.split(";");
+    for (let i = 0; i < cookies.length; i++) {
+      let cookie = cookies[i].trim();
+      if (cookie.startsWith(tokenName)) {
+        return cookie.substring(tokenName.length);
+      }
+    }
+    return null;
+  };
+
+  const token = getTokenFromCookie();
   return (
     <Box
       sx={{
@@ -111,50 +124,77 @@ const DetailsComponent = () => {
           </Typography>
         </Box>
         <Box sx={{ display: "flex", gap: "24px", alignItems: "center" }}>
-          <Button
-            variant="contained"
-            color="primary"
-            sx={{
-              textTransform: "none",
-              height: "48px",
-              padding: "12px 24px 12px 24px",
-              fontSize: "16px",
-              fontWeight: "600",
-              border: "1px solid #1E3A8A",
-              color: "#1A1A1A",
-              boxShadow: "0",
-              background: "#fff",
-              "&:hover": {
-                background: "#fff",
-              },
-              marginTop: "16px",
-            }}
-            onClick={() => router.push("/login")}
-          >
-            Login
-          </Button>
-          <Button
-            variant="contained"
-            color="secondary"
-            sx={{
-              textTransform: "none",
-              height: "48px",
-              padding: "12px",
-              fontSize: "16px",
-              fontWeight: "600",
-              color: "#1A1A1A",
-              background: "none",
-              boxShadow: "0",
-              "&:hover": {
-                background: "none",
+          {token ? (
+            <Button
+              variant="contained"
+              color="primary"
+              sx={{
+                textTransform: "none",
+                height: "48px",
+                padding: "12px 24px 12px 24px",
+                fontSize: "16px",
+                fontWeight: "600",
+                border: "1px solid #1E3A8A",
+                color: "#1A1A1A",
                 boxShadow: "0",
-              },
-              marginTop: "16px",
-            }}
-            onClick={() => router.push("/register")}
-          >
-            Join Chathub →
-          </Button>
+                background: "#fff",
+                "&:hover": {
+                  background: "#fff",
+                },
+                marginTop: "16px",
+              }}
+              onClick={() => router.push("/dashboard")}
+            >
+              Go To Dashboard
+            </Button>
+          ) : (
+            <>
+              <Button
+                variant="contained"
+                color="primary"
+                sx={{
+                  textTransform: "none",
+                  height: "48px",
+                  padding: "12px 24px 12px 24px",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  border: "1px solid #1E3A8A",
+                  color: "#1A1A1A",
+                  boxShadow: "0",
+                  background: "#fff",
+                  "&:hover": {
+                    background: "#fff",
+                  },
+                  marginTop: "16px",
+                }}
+                onClick={() => router.push("/login")}
+              >
+                Login
+              </Button>
+              <Button
+                variant="contained"
+                color="secondary"
+                sx={{
+                  textTransform: "none",
+                  height: "48px",
+                  padding: "12px",
+                  fontSize: "16px",
+                  fontWeight: "600",
+                  color: "#1A1A1A",
+                  background: "none",
+                  boxShadow: "0",
+                  "&:hover": {
+                    background: "none",
+                    boxShadow: "0",
+                  },
+                  marginTop: "16px",
+                }}
+                onClick={() => router.push("/register")}
+              >
+                Join Chathub →
+              </Button>
+            </>
+          )}
         </Box>
       </Box>
       <Box sx={{ padding: "0px 48px 0px 48px" }}>
