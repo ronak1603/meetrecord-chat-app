@@ -13,8 +13,10 @@ import {
   createUserWithEmailAndPassword,
   signOut,
 } from "firebase/auth";
-import { doc, getDoc, setDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
 import { auth, firestore } from "@/services/firebase";
+import useChatMessages from "@/services/useChatMessages";
+import { deleteCookie, setCookie } from "cookies-next";
 
 interface UserDetails {
   uid: string;
@@ -52,6 +54,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [userDetails, setUserDetails] = useState<UserDetails | null>(null);
   const [linkId, setLinkId] = useState<string | null>(null);
+  const { deleteRoom } = useChatMessages(linkId as string);
 
   const generateLinkId = () => {
     return Math.random().toString(36).substr(2, 9);
@@ -70,14 +73,17 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     name: string,
     email: string,
     linkId: string,
-    password: string,
     avatarUrl: string
   ) => {
     await setDoc(
       doc(firestore, "users", uid),
-      { uid, name, email, linkId, password, avatarUrl },
+      { uid, name, email, linkId, avatarUrl },
       { merge: true }
     );
+  };
+
+  const updateLinkId = async (uid: string, newLinkId: string) => {
+    await updateDoc(doc(firestore, "users", uid), { linkId: newLinkId });
   };
 
   const login = async (email: string, password: string) => {
@@ -89,8 +95,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const uid = userCredential.user.uid;
     const userDetails = await fetchUserDetails(uid);
     if (userDetails) {
-      setLinkId(userDetails.linkId);
-      setUserDetails(userDetails);
+      const token = await userCredential.user.getIdToken();
+      setCookie("token", token, { path: "/", maxAge: 60 * 60 * 24 });
+      const newLinkId = generateLinkId();
+      await updateLinkId(uid, newLinkId);
+      setLinkId(newLinkId);
+      setUserDetails({ ...userDetails, linkId: newLinkId });
     }
     setUser(userCredential.user);
   };
@@ -108,17 +118,28 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     );
     const uid = userCredential.user.uid;
     const linkId = generateLinkId();
-    await saveUserDetails(uid, name, email, linkId, password, avatarUrl);
+    await saveUserDetails(uid, name, email, linkId, avatarUrl);
     setLinkId(linkId);
     setUserDetails({ uid, name, email, linkId, avatarUrl });
     setUser(userCredential.user);
+    const token = await userCredential.user.getIdToken();
+    setCookie("token", token, { path: "/", maxAge: 60 * 60 * 24 });
   };
 
   const logout = async () => {
-    await signOut(auth);
-    setUser(null);
-    setLinkId(null);
-    setUserDetails(null);
+    try {
+      if (linkId) {
+        deleteRoom(linkId);
+        await updateLinkId(user!.uid, "");
+        await signOut(auth);
+        setLinkId(null);
+        setUser(null);
+        setUserDetails(null);
+        deleteCookie("token", { path: "/" });
+      }
+    } catch (error) {
+      console.error("Error logging out:", error);
+    }
   };
 
   useEffect(() => {
