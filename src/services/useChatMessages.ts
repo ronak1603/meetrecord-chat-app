@@ -67,8 +67,6 @@ const endChatRoomSession = async (linkId: string) => {
     messagesQuerySnapshot.forEach((messageDoc) => {
       batch.delete(messageDoc.ref);
     });
-    // const chatRoomDoc = doc(firestore, "chatRooms", linkId);
-    // batch.delete(chatRoomDoc);
     await batch.commit();
   } catch (error) {
     console.error("Error deleting chat room:", error);
