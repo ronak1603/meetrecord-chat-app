@@ -14,15 +14,7 @@ import {
 } from "firebase/firestore";
 import { firestore } from "@/services/firebase";
 import { useRouter } from "next/navigation";
-
-interface Message {
-  id: string;
-  senderId: string;
-  text: string;
-  avatarUrl: string;
-  timestamp: Date;
-  name: string;
-}
+import { Message } from "@/types/message";
 
 const fetchMessages = async (linkId: string): Promise<Message[]> => {
   const messagesQuery = query(
@@ -55,6 +47,28 @@ const deleteChatRoom = async (linkId: string) => {
     });
     const chatRoomDoc = doc(firestore, "chatRooms", linkId);
     batch.delete(chatRoomDoc);
+    await batch.commit();
+  } catch (error) {
+    console.error("Error deleting chat room:", error);
+    throw new Error("Failed to delete chat room");
+  }
+};
+
+const endChatRoomSession = async (linkId: string) => {
+  try {
+    const batch = writeBatch(firestore);
+    const messagesCollection = collection(
+      firestore,
+      "chatRooms",
+      linkId,
+      "messages"
+    );
+    const messagesQuerySnapshot = await getDocs(messagesCollection);
+    messagesQuerySnapshot.forEach((messageDoc) => {
+      batch.delete(messageDoc.ref);
+    });
+    // const chatRoomDoc = doc(firestore, "chatRooms", linkId);
+    // batch.delete(chatRoomDoc);
     await batch.commit();
   } catch (error) {
     console.error("Error deleting chat room:", error);
@@ -116,6 +130,21 @@ const useChatMessages = (linkId: string | null) => {
   const { mutate: deleteRoom } = useMutation<void, Error, string>({
     mutationFn: deleteChatRoom,
     onSuccess: () => {
+      router.push("/login");
+      queryClient.invalidateQueries(["messages", linkId]);
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
+  const { mutate: leaveChatRoom, isLoading: isleavingRoom } = useMutation<
+    void,
+    Error,
+    string
+  >({
+    mutationFn: endChatRoomSession,
+    onSuccess: () => {
       router.push("/dashboard");
       queryClient.invalidateQueries(["messages", linkId]);
     },
@@ -127,7 +156,6 @@ const useChatMessages = (linkId: string | null) => {
   const { mutate: createRoom } = useMutation<string, Error, string>({
     mutationFn: (linkid: string) => createChatRoom(linkid),
     onSuccess: (data) => {
-      // queryClient.invalidateQueries(["messages", data]);
       router.push(`/chats/${data}`);
     },
     onError: (error) => {
@@ -151,6 +179,8 @@ const useChatMessages = (linkId: string | null) => {
     isSending,
     deleteRoom,
     createRoom,
+    leaveChatRoom,
+    isleavingRoom,
     checkRoomIdExists,
   };
 };
