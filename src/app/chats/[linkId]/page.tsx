@@ -60,8 +60,7 @@ const ChatRoomPage = () => {
       sx={{
         display: "flex",
         flexDirection: "column",
-        background:
-          "linear-gradient(45deg, #1E3A8A, #1E3A8A 50%, #ffffff 50px);",
+        background: "linear-gradient(to right, #1E3A8A 30%, #1E3A8A 30%)",
         alignItems: "center",
         height: "100vh",
         width: "100vw",
