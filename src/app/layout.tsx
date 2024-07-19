@@ -5,6 +5,7 @@ import { AuthProvider } from "@/context/AuthContext";
 import { AppRouterCacheProvider } from "@mui/material-nextjs/v13-appRouter";
 import { ThemeProvider } from "@mui/system";
 import theme from "@/services/theme";
+import RouteChangeHandler from "@/components/RouteChangeHandler";
 
 export const metadata = {
   title: "Chat App",
@@ -16,13 +17,16 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <head />
       <body>
-        <AuthProvider>
-          <QueryProviderClient>
+        <QueryProviderClient>
+          <AuthProvider>
             <AppRouterCacheProvider>
-              <ThemeProvider theme={theme}>{children}</ThemeProvider>
+              <ThemeProvider theme={theme}>
+                {children}
+                <RouteChangeHandler />
+              </ThemeProvider>
             </AppRouterCacheProvider>
-          </QueryProviderClient>
-        </AuthProvider>
+          </AuthProvider>
+        </QueryProviderClient>
       </body>
     </html>
   );
