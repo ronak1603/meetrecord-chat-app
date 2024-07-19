@@ -3,29 +3,63 @@ import { useAuth } from "@/context/AuthContext";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
-
 import {
   Box,
   Button,
+  CircularProgress,
   Container,
   Divider,
   TextField,
   Typography,
 } from "@mui/material";
 import chatlogo from "@/assets/images/chatlogo.svg";
+import { useMutation } from "@tanstack/react-query";
+import useChatMessages from "@/services/useChatMessages";
+import { doc, getDoc } from "firebase/firestore";
+import { firestore } from "@/services/firebase";
 
 const Dashboard = () => {
   const { linkId, logout } = useAuth();
-  const [newLinkId, setNewLinkId] = useState("");
   const router = useRouter();
 
-  const handleJoin = () => {
-    if (newLinkId.trim() === "") return;
-    router.push(`/chats/${newLinkId}`);
+  const { createRoom } = useChatMessages(linkId);
+
+  const [roomIdInput, setRoomIdInput] = useState<string>("");
+
+  const { mutate, isLoading } = useMutation({
+    mutationFn: logout,
+    onSuccess: () => {
+      router.push(`/login`);
+    },
+    onError: (error) => {
+      console.error(error);
+    },
+  });
+
+  const checkRoomIdExists = async (roomId: string): Promise<boolean> => {
+    try {
+      const roomDoc = await getDoc(doc(firestore, "chatRooms", roomId));
+      return roomDoc.exists();
+    } catch (error) {
+      console.error("Error checking room ID:", error);
+      return false;
+    }
+  };
+
+  const handleJoin = async (e: any) => {
+    e.preventDefault();
+    const exists = await checkRoomIdExists(roomIdInput);
+    if (exists) {
+      router.push(`/chats/${roomIdInput}`);
+    } else {
+      router.push("/error");
+    }
   };
 
   const handleCreateRoom = () => {
-    router.push(`/chats/${linkId}`);
+    if (linkId) {
+      createRoom(linkId);
+    }
   };
 
   return (
@@ -34,7 +68,7 @@ const Dashboard = () => {
         display: "flex",
         flexDirection: "column",
         background:
-          "linear-gradient(45deg, #1E3ABA, #1E3ABA 50%, #ffffff 50px);",
+          "linear-gradient(45deg, #1E3A8A, #1E3A8A 50%, #ffffff 50px);",
         alignItems: "center",
         height: "100vh",
         width: "100vw",
@@ -65,7 +99,6 @@ const Dashboard = () => {
           sx={{
             fontSize: "36px",
             fontWeight: 600,
-            // fontFamily: "initial",
             textAlign: "center",
             color: "#1A1A1A",
           }}
@@ -94,8 +127,8 @@ const Dashboard = () => {
           fullWidth
           variant="outlined"
           label="Enter the Link id"
-          value={newLinkId}
-          onChange={(e) => setNewLinkId(e.target.value)}
+          value={roomIdInput}
+          onChange={(e) => setRoomIdInput(e.target.value)}
           sx={{ paddingBottom: "12px" }}
         />
         <Button
@@ -108,10 +141,10 @@ const Dashboard = () => {
             height: "48px",
             fontSize: "14px",
             fontWeight: "500",
-            background: "#1E3ABA",
+            background: "#1E3A8A",
             boxShadow: "0",
             "&:hover": {
-              background: "#1E3ABA",
+              background: "#1E3A8A",
             },
           }}
         >
@@ -155,10 +188,10 @@ const Dashboard = () => {
             height: "48px",
             fontSize: "14px",
             fontWeight: "500",
-            background: "#1E3ABA",
+            background: "#1E3A8A",
             boxShadow: "0",
             "&:hover": {
-              background: "#1E3ABA",
+              background: "#1E3A8A",
             },
           }}
           onClick={handleCreateRoom}
@@ -178,15 +211,18 @@ const Dashboard = () => {
           right: "16px",
           top: "16px",
           fontWeight: "500",
-          border: "1px solid #1E3ABA",
+          border: "1px solid #1E3A8A",
           color: "#1A1A1A",
           boxShadow: "0",
-          background: "#fff",
+          background: isLoading ? "#9ca3af" : "#fff",
+
           "&:hover": {
             background: "#fff",
           },
         }}
-        onClick={logout}
+        onClick={() => mutate()}
+        endIcon={isLoading ? <CircularProgress size={20} /> : null}
+        disabled={isLoading}
       >
         Logout
       </Button>
