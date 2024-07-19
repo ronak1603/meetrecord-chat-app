@@ -6,6 +6,7 @@ import {
   useEffect,
   useState,
 } from "react";
+import { deleteCookie, setCookie } from "cookies-next";
 import {
   onAuthStateChanged,
   User,
@@ -14,31 +15,10 @@ import {
   signOut,
 } from "firebase/auth";
 import { doc, getDoc, setDoc, updateDoc } from "firebase/firestore";
+
 import { auth, firestore } from "@/services/firebase";
 import useChatMessages from "@/services/useChatMessages";
-import { deleteCookie, setCookie } from "cookies-next";
-
-interface UserDetails {
-  uid: string;
-  name: string;
-  email: string;
-  linkId: string;
-  avatarUrl: string;
-}
-
-interface AuthContextType {
-  user: User | null;
-  userDetails: UserDetails | null;
-  linkId: string | null;
-  login: (email: string, password: string) => Promise<void>;
-  register: (
-    name: string,
-    email: string,
-    password: string,
-    avatarUrl: string
-  ) => Promise<void>;
-  logout: () => Promise<void>;
-}
+import { AuthContextType, UserDetails } from "@/types/auth";
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
@@ -57,7 +37,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const { deleteRoom } = useChatMessages(linkId as string);
 
   const generateLinkId = () => {
-    return Math.random().toString(36).substr(2, 9);
+    return Math.random().toString(36).slice(2, 11);
   };
 
   const fetchUserDetails = async (uid: string) => {
