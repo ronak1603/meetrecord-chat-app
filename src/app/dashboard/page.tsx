@@ -129,7 +129,12 @@ const Dashboard = () => {
           label="Enter the Link id"
           value={roomIdInput}
           onChange={(e) => setRoomIdInput(e.target.value)}
-          sx={{ paddingBottom: "12px" }}
+          sx={{
+            paddingBottom: "12px",
+            "& .MuiInputBase-root": {
+              height: "48px",
+            },
+          }}
         />
         <Button
           fullWidth
