@@ -12,9 +12,16 @@ import {
   setDoc,
   getDoc,
 } from "firebase/firestore";
+import { getAuth } from "firebase/auth";
 import { firestore } from "@/services/firebase";
 import { useRouter } from "next/navigation";
 import { Message } from "@/types/message";
+import { useState } from "react";
+
+interface CreateChatRoomResponse {
+  roomId: string;
+  creatorId: string;
+}
 
 const fetchMessages = async (linkId: string): Promise<Message[]> => {
   const messagesQuery = query(
@@ -55,7 +62,22 @@ const deleteChatRoom = async (linkId: string) => {
 };
 
 const endChatRoomSession = async (linkId: string) => {
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
+
+  if (!currentUser) {
+    throw new Error("User not authenticated");
+  }
+
   try {
+    const chatRoomDoc = await getDoc(doc(firestore, "chatRooms", linkId));
+    if (!chatRoomDoc.exists()) {
+      throw new Error("Chat room does not exist");
+    }
+    const creatorId = chatRoomDoc.data().creatorId;
+    if (currentUser.uid !== creatorId) {
+      throw new Error("Only the creator can end the chat room session");
+    }
     const batch = writeBatch(firestore);
     const messagesCollection = collection(
       firestore,
@@ -67,19 +89,33 @@ const endChatRoomSession = async (linkId: string) => {
     messagesQuerySnapshot.forEach((messageDoc) => {
       batch.delete(messageDoc.ref);
     });
+    batch.delete(chatRoomDoc.ref);
     await batch.commit();
   } catch (error) {
-    console.error("Error deleting chat room:", error);
-    throw new Error("Failed to delete chat room");
+    throw new Error("Failed to end chat room session");
   }
 };
 
 const createChatRoom = async (linkId: string) => {
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
+
+  if (!currentUser) {
+    throw new Error("User not authenticated");
+  }
+
   const newRoomRef = doc(firestore, "chatRooms", linkId);
-  await setDoc(newRoomRef, {
+  const roomData = {
     createdAt: new Date(),
-  });
-  return newRoomRef.id;
+    creatorId: currentUser.uid,
+  };
+
+  await setDoc(newRoomRef, roomData);
+
+  return {
+    roomId: newRoomRef.id,
+    creatorId: currentUser.uid,
+  };
 };
 
 const useChatMessages = (linkId: string | null) => {
@@ -151,10 +187,14 @@ const useChatMessages = (linkId: string | null) => {
     },
   });
 
-  const { mutate: createRoom } = useMutation<string, Error, string>({
+  const { mutate: createRoom } = useMutation<
+    { roomId: string; creatorId: string },
+    Error,
+    string
+  >({
     mutationFn: (linkid: string) => createChatRoom(linkid),
-    onSuccess: (data) => {
-      router.push(`/chats/${data}`);
+    onSuccess: (data: CreateChatRoomResponse) => {
+      router.push(`/chats/${data.roomId}`);
     },
     onError: (error) => {
       console.error(error);
@@ -169,6 +209,18 @@ const useChatMessages = (linkId: string | null) => {
       return false;
     }
   };
+  const getCreatorId = async (roomId: string): Promise<string | null> => {
+    try {
+      const roomDoc = await getDoc(doc(firestore, "chatRooms", roomId));
+      if (roomDoc.exists()) {
+        return roomDoc.data().creatorId || null;
+      }
+      return null;
+    } catch (error) {
+      console.error("Error fetching creator ID:", error);
+      return null;
+    }
+  };
 
   return {
     dbmessages: messagesQuery.data,
@@ -180,6 +232,7 @@ const useChatMessages = (linkId: string | null) => {
     leaveChatRoom,
     isleavingRoom,
     checkRoomIdExists,
+    getCreatorId,
   };
 };
 

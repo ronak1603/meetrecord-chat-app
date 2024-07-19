@@ -1,4 +1,4 @@
-import { useAuth } from "@/context/AuthContext";
+import { getAuth } from "firebase/auth";
 import useChatMessages from "@/services/useChatMessages";
 import { MoreVert } from "@mui/icons-material";
 import {
@@ -8,13 +8,21 @@ import {
   Menu,
   MenuItem,
 } from "@mui/material";
-import { Fragment, useState } from "react";
+import { Fragment, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 const LeaveAndCopytButton = ({ roomId }: { roomId: string }) => {
-  const { isleavingRoom, leaveChatRoom } = useChatMessages(roomId);
+  const { isleavingRoom, leaveChatRoom, getCreatorId } =
+    useChatMessages(roomId);
 
   const [openMenu, setOpenMenu] = useState<null | HTMLElement>(null);
+  const [roomCreatorId, setRoomCreatorId] = useState<string | null>(null);
+
   const open = Boolean(openMenu);
+
+  const auth = getAuth();
+  const currentUser = auth.currentUser;
+  const router = useRouter();
 
   const handleClick = (event: React.MouseEvent<HTMLElement>) => {
     setOpenMenu(event.currentTarget);
@@ -28,6 +36,17 @@ const LeaveAndCopytButton = ({ roomId }: { roomId: string }) => {
     navigator.clipboard.writeText(roomId);
     handleClose();
   };
+
+  useEffect(() => {
+    const fetchCreatorId = async () => {
+      if (roomId) {
+        const creatorId = await getCreatorId(roomId);
+        setRoomCreatorId(creatorId);
+      }
+    };
+
+    fetchCreatorId();
+  }, [roomId, getCreatorId]);
 
   return (
     <Fragment>
@@ -52,11 +71,19 @@ const LeaveAndCopytButton = ({ roomId }: { roomId: string }) => {
             background: "#fff",
           },
         }}
-        onClick={() => leaveChatRoom(roomId as string)}
+        onClick={() => {
+          if (currentUser?.uid === roomCreatorId) {
+            leaveChatRoom(roomId as string);
+          } else {
+            router.push("/dashboard");
+          }
+        }}
         endIcon={isleavingRoom ? <CircularProgress size={20} /> : null}
         disabled={isleavingRoom}
       >
-        End Room Session
+        {currentUser?.uid === roomCreatorId
+          ? "End Room Session"
+          : "Go To Dashboard"}
       </Button>
       <IconButton
         aria-label="more options"
