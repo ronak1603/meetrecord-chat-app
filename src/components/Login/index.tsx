@@ -134,7 +134,6 @@ const Signin = () => {
                 background: "#1E3A8A",
               },
             }}
-            onClick={() => handleSubmit()}
             endIcon={
               isLoading ? (
                 <CircularProgress size={20} sx={{ color: "#fff" }} />
