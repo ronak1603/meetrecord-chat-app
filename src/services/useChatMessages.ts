@@ -16,7 +16,6 @@ import { getAuth } from "firebase/auth";
 import { firestore } from "@/services/firebase";
 import { useRouter } from "next/navigation";
 import { Message } from "@/types/message";
-import { useState } from "react";
 
 interface CreateChatRoomResponse {
   roomId: string;
@@ -139,7 +138,7 @@ const useChatMessages = (linkId: string | null) => {
     },
   });
 
-  const { mutate: deleteRoom } = useMutation<void, Error, string>({
+  const { mutate: deleteRoom } = useMutation({
     mutationFn: endChatRoomSession,
     onSuccess: () => {
       router.push("/login");
@@ -150,11 +149,7 @@ const useChatMessages = (linkId: string | null) => {
     },
   });
 
-  const { mutate: leaveChatRoom, isLoading: isleavingRoom } = useMutation<
-    void,
-    Error,
-    string
-  >({
+  const { mutate: leaveChatRoom, isLoading: isleavingRoom } = useMutation({
     mutationFn: endChatRoomSession,
     onSuccess: () => {
       router.push("/dashboard");
@@ -165,11 +160,7 @@ const useChatMessages = (linkId: string | null) => {
     },
   });
 
-  const { mutate: createRoom } = useMutation<
-    { roomId: string; creatorId: string },
-    Error,
-    string
-  >({
+  const { mutate: createRoom } = useMutation({
     mutationFn: (linkid: string) => createChatRoom(linkid),
     onSuccess: (data: CreateChatRoomResponse) => {
       router.push(`/chats/${data.roomId}`);
