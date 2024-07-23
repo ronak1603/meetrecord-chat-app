@@ -1,7 +1,7 @@
-export const validateEmail = (email: string) => {
-  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-  if (!emailRegex.test(email)) {
-    return "Please enter a valid email address";
+export const validateEmail = (email: string): string | null => {
+  const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  if (!re.test(email)) {
+    return "Invalid email address";
   }
-  return emailRegex.test(email);
+  return null;
 };

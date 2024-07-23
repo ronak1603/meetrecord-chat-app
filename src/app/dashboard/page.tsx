@@ -131,9 +131,6 @@ const Dashboard = () => {
           onChange={(e) => setRoomIdInput(e.target.value)}
           sx={{
             paddingBottom: "12px",
-            "& .MuiInputBase-root": {
-              height: "48px",
-            },
           }}
         />
         <Button

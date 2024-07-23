@@ -56,6 +56,9 @@ const Signin = () => {
     event?.preventDefault();
     mutate(loginForm.values);
   };
+
+  const isButtonDisabled = isLoading || !loginForm.isValid();
+
   return (
     <Box className="flex w-full justify-center items-center">
       <form onSubmit={handleSubmit} className="space-y-4 shadow-lg p-10">
@@ -84,14 +87,14 @@ const Signin = () => {
             label="Email"
             sx={{
               width: "384px",
-              "& .MuiInputBase-root": {
-                height: "48px",
-              },
             }}
           />
           <Box>
             {loginForm.errors.email && (
-              <Typography className="text-red-500">
+              <Typography
+                className="text-red-500"
+                sx={{ fontSize: "12px", lineHeight: "20px", padding: "0px" }}
+              >
                 {loginForm.errors.email}
               </Typography>
             )}
@@ -107,29 +110,29 @@ const Signin = () => {
             type="password"
             sx={{
               width: "384px",
-              "& .MuiInputBase-root": {
-                height: "48px",
-              },
             }}
           />
           <Box>
             {loginForm.errors.password && (
-              <Typography className="text-red-500">
+              <Typography
+                className="text-red-500"
+                sx={{ fontSize: "12px", lineHeight: "20px", padding: "0px" }}
+              >
                 {loginForm.errors.password}
               </Typography>
             )}
           </Box>
         </Box>
-        <Box style={{ marginTop: "24px" }}>
+        <Box style={{ marginTop: "30px" }}>
           <Button
             type="submit"
             sx={{
-              background: isLoading ? "#9ca3af" : "#1E3A8A",
+              background: isButtonDisabled ? "#9ca3af" : "#1E3A8A",
               color: "white",
               width: "384px",
               textTransform: "none",
               height: "48px",
-              cursor: isLoading ? "not-allowed" : "pointer",
+              cursor: isButtonDisabled ? "not-allowed" : "pointer",
               "&:hover": {
                 background: "#1E3A8A",
               },
@@ -139,7 +142,7 @@ const Signin = () => {
                 <CircularProgress size={20} sx={{ color: "#fff" }} />
               ) : null
             }
-            disabled={isLoading}
+            disabled={isButtonDisabled}
           >
             {isLoading ? "Login..." : "Login"}
           </Button>

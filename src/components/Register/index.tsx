@@ -80,6 +80,8 @@ const Signup = () => {
     mutate(registerForm.values);
   };
 
+  const isButtonDisabled = isLoading || !registerForm.isValid();
+
   return (
     <Box className="flex w-full justify-center items-center">
       <form onSubmit={handleSubmit} className="space-y-4 shadow-lg p-10">
@@ -132,14 +134,14 @@ const Signup = () => {
             label="Name"
             sx={{
               width: "384px",
-              "& .MuiInputBase-root": {
-                height: "48px",
-              },
             }}
           />
           <Box>
             {registerForm.errors.name && (
-              <Typography className="text-red-500">
+              <Typography
+                className="text-red-500"
+                sx={{ fontSize: "12px", lineHeight: "20px", padding: "0px" }}
+              >
                 {registerForm.errors.name}
               </Typography>
             )}
@@ -155,14 +157,14 @@ const Signup = () => {
             label="Email"
             sx={{
               width: "384px",
-              "& .MuiInputBase-root": {
-                height: "48px",
-              },
             }}
           />
           <Box>
             {registerForm.errors.email && (
-              <Typography className="text-red-500">
+              <Typography
+                className="text-red-500"
+                sx={{ fontSize: "12px", lineHeight: "20px", padding: "0px" }}
+              >
                 {registerForm.errors.email}
               </Typography>
             )}
@@ -179,30 +181,30 @@ const Signup = () => {
             type="password"
             sx={{
               width: "384px",
-              "& .MuiInputBase-root": {
-                height: "48px",
-              },
             }}
           />
           <Box>
             {registerForm.errors.password && (
-              <Typography className="text-red-500">
+              <Typography
+                className="text-red-500"
+                sx={{ fontSize: "12px", lineHeight: "20px", padding: "0px" }}
+              >
                 {registerForm.errors.password}
               </Typography>
             )}
           </Box>
         </Box>
 
-        <Box style={{ marginTop: "24px" }}>
+        <Box style={{ marginTop: "30px" }}>
           <Button
             type="submit"
             sx={{
-              background: isLoading ? "#9ca3af" : "#1E3A8A",
+              background: isButtonDisabled ? "#9ca3af" : "#1E3A8A",
               color: "white",
               width: "384px",
               textTransform: "none",
               height: "48px",
-              cursor: isLoading ? "not-allowed" : "pointer",
+              cursor: isButtonDisabled ? "not-allowed" : "pointer",
               "&:hover": {
                 background: "#1E3A8A",
               },
@@ -212,7 +214,7 @@ const Signup = () => {
                 <CircularProgress size={20} sx={{ color: "#fff" }} />
               ) : null
             }
-            disabled={isLoading}
+            disabled={isButtonDisabled}
           >
             {isLoading ? "Signing Up..." : "Sign Up"}
           </Button>
