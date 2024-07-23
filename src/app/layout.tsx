@@ -17,18 +17,18 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     <html lang="en">
       <head />
       <body>
-        <QueryProviderClient>
-          <AuthProvider>
-            <AppRouterCacheProvider>
+        <AppRouterCacheProvider>
+          <QueryProviderClient>
+            <AuthProvider>
               <ThemeProvider theme={theme}>
-                {children}
                 <Suspense fallback={<>Loading...</>}>
+                  {children}
                   <RouteChangeHandler />
                 </Suspense>
               </ThemeProvider>
-            </AppRouterCacheProvider>
-          </AuthProvider>
-        </QueryProviderClient>
+            </AuthProvider>
+          </QueryProviderClient>
+        </AppRouterCacheProvider>
       </body>
     </html>
   );
