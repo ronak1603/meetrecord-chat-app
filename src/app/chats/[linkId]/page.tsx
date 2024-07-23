@@ -27,12 +27,13 @@ const ChatRoomPage = () => {
   useEffect(() => {
     const verifyRoomId = async () => {
       const doesExist = await checkRoomIdExists(roomId as string);
-      if ((!roomId && !linkId) || !doesExist) {
-        router.push("/dashboard");
+      if (!linkId || !doesExist) {
+        router.push("/not-exist");
       }
     };
 
     verifyRoomId();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [roomId, linkId, router]);
 
   const handleSendMessage = () => {
@@ -53,6 +54,7 @@ const ChatRoomPage = () => {
         chatContainer.scrollTop = chatContainer.scrollHeight;
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dbmessages]);
 
   return (
@@ -148,10 +150,10 @@ const ChatRoomPage = () => {
             },
           }}
           onClick={handleSendMessage}
-          endIcon={isSending ? <CircularProgress size={20} /> : null}
+          // endIcon={isSending ? <CircularProgress size={20} /> : null}
           disabled={isSending}
         >
-          ↑
+          {isSending ? <CircularProgress size={20} /> : "↑"}
         </Button>
       </Box>
       <LeaveAndCopytButton roomId={roomId as string} />
