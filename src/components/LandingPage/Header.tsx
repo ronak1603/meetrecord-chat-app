@@ -1,11 +1,8 @@
-"use client";
-import { useRouter } from "next/navigation";
-import { Box, Button, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import Image from "next/image";
 import chatlogo from "@/assets/images/chatlogo.svg";
 
 const HeaderComponent = () => {
-  const router = useRouter();
   return (
     <Box
       sx={{
